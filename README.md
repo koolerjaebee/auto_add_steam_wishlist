@@ -6,11 +6,13 @@ Automatically copy a Steam wishlist from one account to another using modern Pla
 
 - 📥 Download wishlist from any public Steam profile
 - 🤖 Automatically add games to your wishlist
-- ⏱️ Smart rate limiting (4s per game) to avoid IP bans
+- ⏱️ Smart rate limiting to avoid IP bans
 - 🔒 Handles age verification gates automatically
 - ⏭️ Skips games already in your wishlist
 - 📊 Detailed progress tracking and summary
 - 🧪 Dry-run mode for testing without login
+- 💾 Optional login storage state reuse
+- 🧾 Failed app ID log for retry
 
 ## 📋 Requirements
 
@@ -52,6 +54,19 @@ python Start.py --user <steam_user_id> --limit 5
 
 # Combine dry-run with limit
 python Start.py --dry-run --user <steam_user_id> --limit 10
+
+# Headless mode
+python Start.py --user <steam_user_id> --headless
+
+# Save and reuse login session
+python Start.py --user <steam_user_id> --save-storage
+python Start.py --user <steam_user_id> --storage-state steam_storage.json
+
+# Tune rate limits and download concurrency
+python Start.py --user <steam_user_id> --rate-limit 4 --download-delay 0.3 --download-workers 2
+
+# Keep wishlist JSON files for debugging
+python Start.py --user <steam_user_id> --no-cleanup
 ```
 
 ### Command Line Arguments
@@ -59,23 +74,23 @@ python Start.py --dry-run --user <steam_user_id> --limit 10
 - `--dry-run`: Download and preview wishlist without logging in or adding games
 - `--user <id>`: Specify source Steam user ID
 - `--limit <n>`: Limit number of games to add (useful for testing)
+- `--rate-limit <sec>`: Delay between add actions (default: 4)
+- `--download-delay <sec>`: Delay between page downloads (default: 0.3)
+- `--download-workers <n>`: Parallel download workers (default: 2)
+- `--headless`: Run browser in headless mode
+- `--storage-state <path>`: Path to Playwright storage state (default: steam_storage.json)
+- `--save-storage`: Save storage state after login
+- `--no-cleanup`: Keep downloaded wishlist JSON files
+- `--errors-file <path>`: Where to save failed app IDs (default: wishlist_errors.json)
 - `-h, --help`: Show help message
-
-## 💡 Interactive Prompts
-
-When running normally (without `--dry-run`), you'll be prompted for:
-1. Source Steam user ID (if not provided via `--user`)
-2. Your Steam username
-3. Your Steam password
-4. Manual completion of 2FA (if enabled)
 
 ## ⚠️ Important Notes
 
-- **Rate Limiting**: The script waits 4 seconds between each game addition to comply with Steam's 2025 rate limits and avoid IP bans
+- **Rate Limiting**: The script waits between each game addition to comply with Steam's rate limits and avoid IP bans
 - **Public Wishlist**: The source user's wishlist must be set to public
 - **2FA Support**: You'll need to complete two-factor authentication manually when prompted
 - **Privacy**: Your password is never logged or displayed on screen
-- **Estimated Time**: For 100 games, expect ~6-7 minutes of runtime
+- **Estimated Time**: For 100 games at 4s per game, expect ~6-7 minutes of runtime
 
 ## 🔧 Troubleshooting
 
@@ -88,9 +103,9 @@ When running normally (without `--dry-run`), you'll be prompted for:
 - Check that you have Python 3.9+
 
 **Rate limiting / IP ban**
-- The script already includes 4-second delays
+- The script already includes delays between add actions
 - If you get banned, wait 6-24 hours before trying again
-- Don't modify the `RATE_LIMIT_DELAY` constant
+- Don't reduce the `--rate-limit` too aggressively
 
 ## 🆕 What's New in 2025 Edition
 
@@ -101,6 +116,8 @@ When running normally (without `--dry-run`), you'll be prompted for:
 - ✅ Updated rate limiting based on 2025 Steam API changes
 - ✅ Cleaner code with better structure
 - ✅ Fixed security issues (password no longer displayed)
+- ✅ Storage state reuse for faster logins
+- ✅ Failed item logging for retry
 
 ## 📝 Example Output
 
